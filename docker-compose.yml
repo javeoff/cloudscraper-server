@@ -1,0 +1,5 @@
+services:
+  app:
+    image: ghcr.io/javeoff/cloudscraper-server:main
+    ports:
+      - 5000:5000
