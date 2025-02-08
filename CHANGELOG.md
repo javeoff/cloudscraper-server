@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/javeoff/cloudscraper-server/compare/v1.0.0...v1.1.0) (2025-02-08)
+
+
+### Features
+
+* **docker:** add docker-compose file to simplify application deployment and configuration ([bb79d1a](https://github.com/javeoff/cloudscraper-server/commit/bb79d1ad109078c9ac7198a758006161bed8717b))
+
 # 1.0.0 (2025-02-08)
 
 
