@@ -118,12 +118,11 @@ def get_proxy_request_url(req, url):
 
 
 def get_proxy_request_headers(req, url):
+    # Start with our base headers
     headers = get_headers()
+    # Always use gzip encoding
     headers['Accept-Encoding'] = 'gzip, deflate, br'
-
-    for header in req.headers:
-        if header[0].lower() not in ['host', 'connection', 'content-length']:
-            headers[header[0]] = header[1]
+    # Generate origin and referer
     headers = generate_origin_and_ref(url, headers)
     return headers
 
