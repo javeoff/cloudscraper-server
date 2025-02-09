@@ -35,3 +35,31 @@ if __name__ == "__main__":
     serve(app, host="0.0.0.0", port=5000) # change the port here
 ```
 Feel free to configure flask or other options to suite your needs
+
+## Using Make Commands
+The project includes several Make commands to help manage the Docker container:
+
+```bash
+# Build the Docker image
+make build
+
+# Run the container
+make run 
+
+# Build and run in one command
+make up
+
+# Stop and remove the container
+make clean
+
+# View container logs
+make logs
+
+# Restart the container 
+make restart
+
+# Check container status
+make status
+```
+
+You can change the port and container settings by editing the variables at the top of the Makefile.
