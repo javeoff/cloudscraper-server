@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "release": "semantic-release"
+    "release": "semantic-release",
+    "lint": "flake8 server.py"
   },
   "keywords": [],
   "author": "",
