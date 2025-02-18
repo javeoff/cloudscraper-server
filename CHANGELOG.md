@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/javeoff/cloudscraper-server/compare/v1.2.0...v1.3.0) (2025-02-18)
+
+
+### Features
+
+* Add automatic http:// protocol detection for proxy URLs ([08b5d36](https://github.com/javeoff/cloudscraper-server/commit/08b5d36881828ef071894eac22fbde99a042fc5a))
+
 # [1.2.0](https://github.com/javeoff/cloudscraper-server/compare/v1.1.0...v1.2.0) (2025-02-18)
 
 
