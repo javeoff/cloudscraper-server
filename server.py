@@ -112,6 +112,10 @@ def get_headers():
 
 def get_proxy_request_url(req, url):
     full_url = unquote(url.strip('"'))
+    # Add http:// protocol if it's missing
+    if not full_url.startswith(('http://', 'https://')):
+        full_url = 'http://' + full_url
+    
     if req.query_string:
         full_url = f"{full_url}?{req.query_string.decode('utf-8')}"
     return full_url
