@@ -149,29 +149,33 @@ def handle_proxy(url):
     if request.method == 'GET':
         full_url = get_proxy_request_url(request, url)
         headers = get_proxy_request_headers(request, url)
+        
+        # Выбираем прокси заранее для логирования
+        proxies = None
+        using_proxy = "direct connection"
+        if PROXY_LIST:
+            proxy = random.choice(PROXY_LIST)
+            proxies = {
+                'http': proxy,
+                'https': proxy
+            }
+            using_proxy = proxy
 
+        print(f"Starting request to: {full_url.split('?')[0]} via {using_proxy}")
+        
         try:
             start = time.time()
-            
-            # Choose random proxy if available
-            proxies = None
-            if PROXY_LIST:
-                proxy = random.choice(PROXY_LIST)
-                proxies = {
-                    'http': proxy,
-                    'https': proxy
-                }
-            
             response = scraper.get(full_url, headers=headers, proxies=proxies)
             end = time.time()
             elapsed = end - start
-            print(f"Proxied request for {full_url.split('?')[0]} in {elapsed:.6f} seconds")
+            
+            print(f"Completed request to {full_url.split('?')[0]} - Status: {response.status_code} in {elapsed:.6f} seconds")
             response.raise_for_status()
 
             return generate_proxy_response(response)
 
         except Exception as e:
-            print(f"Proxy Request Error: {str(e)}")
+            print(f"Failed request to {full_url.split('?')[0]} via {using_proxy} - Error: {str(e)}")
             return {'error': str(e)}, 500
 
 
