@@ -1,6 +1,7 @@
 import cloudscraper
 import time
-
+import random
+from pathlib import Path
 from urllib.parse import unquote
 from flask import Flask, request, Response
 
@@ -13,6 +14,17 @@ scraper = cloudscraper.create_scraper(
     delay=1,
     allow_brotli=True
 )
+
+def load_proxies():
+    proxy_file = Path("var/proxies.txt")
+    if not proxy_file.exists():
+        print("Warning: var/proxies.txt not found")
+        return []
+        
+    with open(proxy_file, "r") as f:
+        return [f"http://{line.strip()}" for line in f if line.strip()]
+
+PROXY_LIST = load_proxies()
 
 
 def set_user_agent(headers):
@@ -135,12 +147,22 @@ def get_proxy_request_headers(req, url):
 @app.route("/api/proxy/<path:url>", methods=["GET"])
 def handle_proxy(url):
     if request.method == 'GET':
-        full_url = get_proxy_request_url(request, url)  # parse request url
-        headers = get_proxy_request_headers(request, url)  # generate headers for the request
+        full_url = get_proxy_request_url(request, url)
+        headers = get_proxy_request_headers(request, url)
 
         try:
             start = time.time()
-            response = scraper.get(full_url, headers=headers)
+            
+            # Choose random proxy if available
+            proxies = None
+            if PROXY_LIST:
+                proxy = random.choice(PROXY_LIST)
+                proxies = {
+                    'http': proxy,
+                    'https': proxy
+                }
+            
+            response = scraper.get(full_url, headers=headers, proxies=proxies)
             end = time.time()
             elapsed = end - start
             print(f"Proxied request for {full_url.split('?')[0]} in {elapsed:.6f} seconds")
