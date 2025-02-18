@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/javeoff/cloudscraper-server/compare/v1.3.0...v1.4.0) (2025-02-18)
+
+
+### Features
+
+* Add HTTP proxy support with dynamic proxy selection ([afb1007](https://github.com/javeoff/cloudscraper-server/commit/afb100778a3da29ec0777e72190070a8e946ce1c))
+
 # [1.3.0](https://github.com/javeoff/cloudscraper-server/compare/v1.2.0...v1.3.0) (2025-02-18)
 
 
