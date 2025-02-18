@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/javeoff/cloudscraper-server/compare/v1.1.0...v1.2.0) (2025-02-18)
+
+
+### Features
+
+* Add fake-useragent dependency to requirements.txt ([02b02ee](https://github.com/javeoff/cloudscraper-server/commit/02b02eecb54c21e925882e52ddc0dc67f6b3b213))
+
 # 1.0.0 (2025-02-09)
 
 
