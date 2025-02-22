@@ -5,6 +5,17 @@ from pathlib import Path
 from urllib.parse import unquote
 from flask import Flask, request, Response
 
+CHROME_VERSIONS = [
+    '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+    '"Not_A Brand";v="8", "Chromium";v="119", "Google Chrome";v="119"',
+    '"Not_A Brand";v="8", "Chromium";v="118", "Google Chrome";v="118"',
+]
+
+PLATFORMS = ['"Windows"', '"Windows NT"', '"macOS"']
+
+FETCH_MODES = ['cors', 'navigate', 'no-cors']
+FETCH_DESTS = ['empty', 'document', 'object']
+
 scraper = cloudscraper.create_scraper(
     browser={
         'browser': 'chrome',
@@ -28,19 +39,18 @@ PROXY_LIST = load_proxies()
 
 
 def set_user_agent(headers):
-    # this needs to match Sec-Ch-Ua (cloudflare will flag as a bot seeing two different user agents)
-    # make sure to change it accordingly if you change this
-    headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) ' \
-                            'Chrome/120.0.0.0 Safari/537.36'
+    chrome_version = headers.get('Sec-Ch-Ua', CHROME_VERSIONS[0])
+    version = chrome_version.split('Chrome";v="')[1].split('"')[0]
+    headers['User-Agent'] = f'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{version}.0.0.0 Safari/537.36'
     return headers
 
 
 def set_security_headers(headers):
-    headers['Sec-Ch-Ua'] = '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"'
+    headers['Sec-Ch-Ua'] = random.choice(CHROME_VERSIONS)
     headers['Sec-Ch-Ua-Mobile'] = '?0'
-    headers['Sec-Ch-Ua-Platform'] = '"Windows"'
-    headers['Sec-Fetch-Dest'] = 'empty'
-    headers['Sec-Fetch-Mode'] = 'cors'
+    headers['Sec-Ch-Ua-Platform'] = random.choice(PLATFORMS)
+    headers['Sec-Fetch-Dest'] = random.choice(FETCH_DESTS)
+    headers['Sec-Fetch-Mode'] = random.choice(FETCH_MODES)
     headers['Sec-Fetch-Site'] = 'same-origin'
     return headers
 
@@ -117,8 +127,8 @@ def get_headers():
         'Accept-Encoding': 'gzip, deflate, br',
         'Connection': 'keep-alive'
     }
-    headers = set_user_agent(headers)
-    headers = set_security_headers(headers)
+    headers = set_security_headers(headers)  # First set security headers
+    headers = set_user_agent(headers)        # Then set user agent to match
     return headers
 
 
