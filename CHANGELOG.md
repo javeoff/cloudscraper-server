@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/javeoff/cloudscraper-server/compare/v1.5.0...v1.6.0) (2025-02-22)
+
+
+### Features
+
+* Enhance Cloudflare header randomization with dynamic Chrome versions and platforms ([09ebd39](https://github.com/javeoff/cloudscraper-server/commit/09ebd391e0666bccf61327c8ef6b5fdb5838f2b6))
+
 # [1.5.0](https://github.com/javeoff/cloudscraper-server/compare/v1.4.0...v1.5.0) (2025-02-18)
 
 
