@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/javeoff/cloudscraper-server/compare/v1.4.0...v1.5.0) (2025-02-18)
+
+
+### Features
+
+* Enhance proxy request logging with detailed start, status, and error information ([881b14c](https://github.com/javeoff/cloudscraper-server/commit/881b14c6485d37a65591e02fd5c0a1c6ed4234c9))
+
 # [1.4.0](https://github.com/javeoff/cloudscraper-server/compare/v1.3.0...v1.4.0) (2025-02-18)
 
 
