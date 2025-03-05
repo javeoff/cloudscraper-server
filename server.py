@@ -32,8 +32,22 @@ def load_proxies():
         print("Warning: var/proxies.txt not found")
         return []
         
+    proxies = []
     with open(proxy_file, "r") as f:
-        return [f"http://{line.strip()}" for line in f if line.strip()]
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+                
+            # Проверяем, содержит ли строка формат логин:пароль@IP:порт
+            if '@' in line:
+                # Уже в правильном формате для requests
+                proxies.append(f"http://{line}")
+            else:
+                # Старый формат (только IP:порт)
+                proxies.append(f"http://{line}")
+    
+    return proxies
 
 PROXY_LIST = load_proxies()
 
