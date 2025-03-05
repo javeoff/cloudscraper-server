@@ -112,7 +112,8 @@ def generate_proxy_response(response) -> Response:
     content_type = response.headers.get('content-type', '')
 
     if 'text' in content_type or 'html' in content_type:
-        content = response.text
+        # Явно указываем кодировку UTF-8 для текстового содержимого
+        content = response.content.decode('utf-8', errors='replace')
     else:
         content = response.content
 
@@ -120,7 +121,7 @@ def generate_proxy_response(response) -> Response:
 
     # For JSON content
     if 'application/json' in content_type:
-        return Response(content, status=response.status_code, content_type='application/json')
+        return Response(content, status=response.status_code, content_type='application/json; charset=utf-8')
 
     # For HTML content
     if 'text/html' in content_type:
