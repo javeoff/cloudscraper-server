@@ -59,17 +59,42 @@ PROXY_LIST = load_proxies()
 def set_user_agent(headers):
     chrome_version = headers.get('Sec-Ch-Ua', CHROME_VERSIONS[0])
     version = chrome_version.split('Chrome";v="')[1].split('"')[0]
-    headers['User-Agent'] = f'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{version}.0.0.0 Safari/537.36'
+    
+    # Создаем разнообразные User-Agent
+    platform = headers.get('Sec-Ch-Ua-Platform', '"Windows"').strip('"')
+    
+    if platform == 'Windows' or platform == 'Windows NT':
+        os_version = random.choice(['10.0', '11.0'])
+        headers['User-Agent'] = f'Mozilla/5.0 (Windows NT {os_version}; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{version}.0.{random.randint(0, 9999)}.{random.randint(0, 99)} Safari/537.36'
+    elif platform == 'macOS':
+        os_version = random.choice(['10_15_7', '11_2_3', '12_0_1', '13_1'])
+        headers['User-Agent'] = f'Mozilla/5.0 (Macintosh; Intel Mac OS X {os_version}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{version}.0.{random.randint(0, 9999)}.{random.randint(0, 99)} Safari/537.36'
+    elif platform == 'Linux':
+        headers['User-Agent'] = f'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{version}.0.{random.randint(0, 9999)}.{random.randint(0, 99)} Safari/537.36'
+    elif platform == 'Android':
+        android_version = random.choice(['10', '11', '12', '13'])
+        device = random.choice(['SM-G970F', 'SM-G973F', 'Pixel 6', 'Pixel 7'])
+        headers['User-Agent'] = f'Mozilla/5.0 (Linux; Android {android_version}; {device}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{version}.0.{random.randint(0, 9999)}.{random.randint(0, 99)} Mobile Safari/537.36'
+    else:
+        # Fallback
+        headers['User-Agent'] = f'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{version}.0.{random.randint(0, 9999)}.{random.randint(0, 99)} Safari/537.36'
+    
     return headers
 
 
 def set_security_headers(headers):
     headers['Sec-Ch-Ua'] = random.choice(CHROME_VERSIONS)
-    headers['Sec-Ch-Ua-Mobile'] = '?0'
+    headers['Sec-Ch-Ua-Mobile'] = random.choice(['?0', '?1']) if random.random() > 0.8 else '?0'
     headers['Sec-Ch-Ua-Platform'] = random.choice(PLATFORMS)
     headers['Sec-Fetch-Dest'] = random.choice(FETCH_DESTS)
     headers['Sec-Fetch-Mode'] = random.choice(FETCH_MODES)
-    headers['Sec-Fetch-Site'] = 'same-origin'
+    headers['Sec-Fetch-Site'] = random.choice(FETCH_SITES)
+    
+    # Случайно добавлять дополнительные заголовки
+    if random.random() > 0.7:
+        headers['Sec-Fetch-User'] = '?1'
+    
+    # Случайно варьировать порядок заголовков
     return headers
 
 
@@ -141,11 +166,29 @@ def generate_proxy_response(response) -> Response:
 
 def get_headers():
     headers = {
-        'Accept': 'application/json, text/plain, */*',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive'
+        'Accept': random.choice([
+            'application/json, text/plain, */*',
+            'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+            'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'application/json,text/html,application/xml;q=0.9,*/*;q=0.8'
+        ]),
+        'Accept-Language': random.choice(ACCEPT_LANGUAGES),
+        'Accept-Encoding': random.choice(ACCEPT_ENCODINGS),
+        'Connection': random.choice(['keep-alive', 'close']) if random.random() > 0.9 else 'keep-alive',
     }
+    
+    # Случайно добавлять Cache-Control
+    if random.random() > 0.6:
+        headers['Cache-Control'] = random.choice(['max-age=0', 'no-cache', 'no-store'])
+    
+    # Случайно добавлять DNT (Do Not Track)
+    if random.random() > 0.7:
+        headers['DNT'] = '1'
+    
+    # Случайно добавлять Pragma
+    if random.random() > 0.8:
+        headers['Pragma'] = 'no-cache'
+        
     headers = set_security_headers(headers)  # First set security headers
     headers = set_user_agent(headers)        # Then set user agent to match
     return headers
@@ -194,8 +237,23 @@ def handle_proxy(url):
         print(f"Starting request to: {full_url.split('?')[0]} via {using_proxy}", file=sys.stdout)
         
         try:
+            # Добавить случайную задержку перед запросом
+            if random.random() > 0.7:
+                delay = random.uniform(0.1, 0.5)
+                time.sleep(delay)
+            
             start = time.time()
-            response = scraper.get(full_url, headers=headers, proxies=proxies)
+            
+            # Случайно варьировать параметры запроса
+            request_kwargs = {
+                'headers': headers,
+                'proxies': proxies,
+                'allow_redirects': random.choice([True, False]) if random.random() > 0.9 else True,
+                'timeout': random.uniform(10, 30)
+            }
+            
+            response = scraper.get(full_url, **request_kwargs)
+            
             end = time.time()
             elapsed = end - start
             
