@@ -1,3 +1,4 @@
+﻿import sys
 import cloudscraper
 import time
 import random
@@ -180,13 +181,14 @@ def handle_proxy(url):
         using_proxy = "direct connection"
         if PROXY_LIST:
             proxy = random.choice(PROXY_LIST)
+            print(proxy, file=sys.stdout)
             proxies = {
                 'http': proxy,
                 'https': proxy
             }
             using_proxy = proxy
 
-        print(f"Starting request to: {full_url.split('?')[0]} via {using_proxy}")
+        print(f"Starting request to: {full_url.split('?')[0]} via {using_proxy}", file=sys.stdout)
         
         try:
             start = time.time()
@@ -194,14 +196,14 @@ def handle_proxy(url):
             end = time.time()
             elapsed = end - start
             
-            print(f"Completed request to {full_url.split('?')[0]} - Status: {response.status_code} in {elapsed:.6f} seconds")
+            print(f"Completed request to {full_url.split('?')[0]} - Status: {response.status_code} in {elapsed:.6f} seconds", file=sys.stdout)
             response.raise_for_status()
 
             return generate_proxy_response(response)
 
         except Exception as e:
             print(f"Failed request to {full_url.split('?')[0]} via {using_proxy} - Error: {str(e)}")
-            return {'error': str(e)}, 500
+            return {'error': str(e), 'proxies': proxies }, 500
 
 
 if __name__ == "__main__":
