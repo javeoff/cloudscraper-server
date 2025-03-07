@@ -10,12 +10,31 @@ CHROME_VERSIONS = [
     '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
     '"Not_A Brand";v="8", "Chromium";v="119", "Google Chrome";v="119"',
     '"Not_A Brand";v="8", "Chromium";v="118", "Google Chrome";v="118"',
+    '"Not_A Brand";v="99", "Chromium";v="116", "Google Chrome";v="116"',
+    '"Not_A Brand";v="99", "Chromium";v="117", "Google Chrome";v="117"',
 ]
 
-PLATFORMS = ['"Windows"', '"Windows NT"', '"macOS"']
+PLATFORMS = ['"Windows"', '"Windows NT"', '"macOS"', '"Linux"', '"Android"']
 
-FETCH_MODES = ['cors', 'navigate', 'no-cors']
-FETCH_DESTS = ['empty', 'document', 'object']
+FETCH_MODES = ['cors', 'navigate', 'no-cors', 'same-origin']
+FETCH_DESTS = ['empty', 'document', 'object', 'iframe', 'image']
+FETCH_SITES = ['same-origin', 'same-site', 'cross-site', 'none']
+
+ACCEPT_LANGUAGES = [
+    'en-US,en;q=0.9', 
+    'en-GB,en;q=0.9,en-US;q=0.8', 
+    'en-CA,en;q=0.9,fr-CA;q=0.8',
+    'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
+    'de-DE,de;q=0.9,en;q=0.8',
+    'fr-FR,fr;q=0.9,en;q=0.8',
+    'es-ES,es;q=0.9,en;q=0.8'
+]
+
+ACCEPT_ENCODINGS = [
+    'gzip, deflate, br',
+    'br, gzip, deflate',
+    'gzip, br, deflate'
+]
 
 scraper = cloudscraper.create_scraper(
     browser={
