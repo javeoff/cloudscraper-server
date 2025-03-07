@@ -1,4 +1,4 @@
-﻿import sys
+import sys
 import cloudscraper
 import time
 import random
