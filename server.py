@@ -34,11 +34,14 @@ def load_proxies():
         return []
         
     proxies = []
-    with open(proxy_file, "r") as f:
+    with open(proxy_file, "r", encoding="utf-8-sig") as f:  # Use utf-8-sig to automatically handle BOM
         for line in f:
             line = line.strip()
             if not line:
                 continue
+                
+            # Remove any BOM character if present
+            line = line.lstrip('\ufeff')
                 
             # Проверяем, содержит ли строка формат логин:пароль@IP:порт
             if '@' in line:
