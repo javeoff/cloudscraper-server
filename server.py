@@ -2,6 +2,10 @@ import sys
 import cloudscraper
 import time
 import random
+import threading
+import signal
+import os
+from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import unquote
 from flask import Flask, request, Response
@@ -35,6 +39,12 @@ ACCEPT_ENCODINGS = [
     'br, gzip, deflate',
     'gzip, br, deflate'
 ]
+
+# Health monitoring
+last_successful_request = datetime.now()
+health_check_interval = 60  # seconds
+max_request_age = 300  # seconds (5 minutes without successful requests triggers restart)
+health_monitor_running = True
 
 scraper = cloudscraper.create_scraper(
     browser={
@@ -182,6 +192,23 @@ def generate_proxy_response(response) -> Response:
         headers=headers
     )
 
+def health_monitor():
+    """Monitor application health and restart if necessary"""
+    global health_monitor_running
+    
+    while health_monitor_running:
+        time.sleep(health_check_interval)
+        now = datetime.now()
+        time_since_last_request = (now - last_successful_request).total_seconds()
+        
+        print(f"Health check: {time_since_last_request:.1f} seconds since last successful request", file=sys.stdout)
+        
+        if time_since_last_request > max_request_age:
+            print(f"Application appears to be unresponsive for {time_since_last_request:.1f} seconds. Restarting...", file=sys.stderr)
+            # Force restart by sending SIGTERM to self
+            os.kill(os.getpid(), signal.SIGTERM)
+            break
+
 
 def get_headers():
     headers = {
@@ -237,6 +264,8 @@ def get_proxy_request_headers(req, url):
 # Cloudflare bypassed request
 @app.route("/api/proxy/<path:url>", methods=["GET"])
 def handle_proxy(url):
+    global last_successful_request
+    
     if request.method == 'GET':
         full_url = get_proxy_request_url(request, url)
         headers = get_proxy_request_headers(request, url)
@@ -276,6 +305,10 @@ def handle_proxy(url):
             end = time.time()
             elapsed = end - start
             
+            # Update last successful request timestamp
+            if response.status_code < 500:
+                last_successful_request = datetime.now()
+            
             print(f"Completed request to {full_url.split('?')[0]} - Status: {response.status_code} in {elapsed:.6f} seconds", file=sys.stdout)
             response.raise_for_status()
 
@@ -286,7 +319,27 @@ def handle_proxy(url):
             return {'error': str(e), 'proxies': proxies }, 500
 
 
+def signal_handler(sig, frame):
+    global health_monitor_running
+    print("Shutting down gracefully...")
+    health_monitor_running = False
+    sys.exit(0)
+
 if __name__ == "__main__":
     print('Starting cloudflare bypass proxy server')
+    
+    # Set up signal handlers
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    
+    # Start health monitoring in a separate thread
+    health_thread = threading.Thread(target=health_monitor, daemon=True)
+    health_thread.start()
+    
+    # Add a health check endpoint
+    @app.route("/health", methods=["GET"])
+    def health_check():
+        return {"status": "ok", "last_successful_request": last_successful_request.isoformat()}, 200
+    
     from waitress import serve
     serve(app, host="0.0.0.0", port=5000)
