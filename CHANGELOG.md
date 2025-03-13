@@ -1,3 +1,21 @@
+# [1.7.0](https://github.com/javeoff/cloudscraper-server/compare/v1.6.0...v1.7.0) (2025-03-13)
+
+
+### Bug Fixes
+
+* Add explicit stdout logging and error proxy details in handle_proxy ([d8e4dd3](https://github.com/javeoff/cloudscraper-server/commit/d8e4dd387ccd7777228e2b7bbcc4684e1a1c4d0d))
+* Handle BOM characters when loading proxies from file ([093b905](https://github.com/javeoff/cloudscraper-server/commit/093b905a2794484ab8c5e068c9d434de02c89813))
+* Handle UTF-8 encoding and BOM characters in proxy response ([4077abb](https://github.com/javeoff/cloudscraper-server/commit/4077abbe7c67d4f1cfe5fb058484f8ff73eca341))
+* Remove BOM character causing SyntaxError in server.py ([fdbd593](https://github.com/javeoff/cloudscraper-server/commit/fdbd593d8d9b6245745b38c52a88c627eee3431c))
+* Update proxy loading to support login:password@IP:port format ([43d3c2e](https://github.com/javeoff/cloudscraper-server/commit/43d3c2ec5a2adcded835cc52ee79e8c23497b1ca))
+
+
+### Features
+
+* Add health monitoring and auto-restart mechanism to proxy server ([b55f114](https://github.com/javeoff/cloudscraper-server/commit/b55f1140e52b424ed44ea2da5a5c3ed0239159a2))
+* Enhance request diversity and randomization for Cloudflare evasion ([4c582e3](https://github.com/javeoff/cloudscraper-server/commit/4c582e32b78abf882426e04e5382038976f379db))
+* Expand browser configuration with more versions, platforms, and request headers ([a70ea97](https://github.com/javeoff/cloudscraper-server/commit/a70ea97450348a1aaefcaf0d92b40a1593bf1411))
+
 # [1.6.0](https://github.com/javeoff/cloudscraper-server/compare/v1.5.0...v1.6.0) (2025-02-22)
 
 
