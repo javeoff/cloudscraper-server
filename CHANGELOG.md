@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/javeoff/cloudscraper-server/compare/v1.7.0...v1.8.0) (2025-03-15)
+
+
+### Features
+
+* Implement proxy error tracking and rest mechanism ([8449815](https://github.com/javeoff/cloudscraper-server/commit/8449815c4aea4b3c1d1bd633cd602e38bd4de2dd))
+
 # [1.7.0](https://github.com/javeoff/cloudscraper-server/compare/v1.6.0...v1.7.0) (2025-03-13)
 
 
