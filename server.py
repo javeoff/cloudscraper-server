@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import unquote
 from flask import Flask, request, Response
+from collections import defaultdict
 
 CHROME_VERSIONS = [
     '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
@@ -57,6 +58,7 @@ scraper = cloudscraper.create_scraper(
 )
 
 def load_proxies():
+    global PROXY_LIST
     proxy_file = Path("var/proxies.txt")
     if not proxy_file.exists():
         print("Warning: var/proxies.txt not found")
@@ -80,9 +82,14 @@ def load_proxies():
                 # Старый формат (только IP:порт)
                 proxies.append(f"http://{line}")
     
+    PROXY_LIST = proxies
     return proxies
 
-PROXY_LIST = load_proxies()
+# Proxy management
+PROXY_LIST = []
+RESTING_PROXIES = {}  # Dictionary to store proxies that are resting with their rest end time
+proxy_errors = defaultdict(int)  # Track errors per proxy
+proxy_lock = threading.Lock()  # Lock for thread-safe proxy operations
 
 
 def set_user_agent(headers):
@@ -192,6 +199,39 @@ def generate_proxy_response(response) -> Response:
         headers=headers
     )
 
+def get_active_proxy():
+    """Get a random proxy that is not resting"""
+    with proxy_lock:
+        # First, check if any resting proxies should be reactivated
+        current_time = datetime.now()
+        reactivated = []
+        for proxy, rest_end_time in list(RESTING_PROXIES.items()):
+            if current_time >= rest_end_time:
+                PROXY_LIST.append(proxy)
+                reactivated.append(proxy)
+        
+        # Remove reactivated proxies from resting list
+        for proxy in reactivated:
+            del RESTING_PROXIES[proxy]
+            print(f"Proxy {proxy} reactivated after rest period")
+        
+        # Return None if no active proxies
+        if not PROXY_LIST:
+            return None
+            
+        return random.choice(PROXY_LIST)
+
+def put_proxy_to_rest(proxy):
+    """Put a proxy to rest for 1 hour"""
+    with proxy_lock:
+        if proxy in PROXY_LIST:
+            PROXY_LIST.remove(proxy)
+        
+        rest_end_time = datetime.now() + timedelta(hours=1)
+        RESTING_PROXIES[proxy] = rest_end_time
+        print(f"Proxy {proxy} put to rest until {rest_end_time.strftime('%H:%M:%S')}")
+        print(f"Active proxies: {len(PROXY_LIST)}, Resting proxies: {len(RESTING_PROXIES)}")
+
 def health_monitor():
     """Monitor application health and restart if necessary"""
     global health_monitor_running
@@ -273,9 +313,9 @@ def handle_proxy(url):
         # Выбираем прокси заранее для логирования
         proxies = None
         using_proxy = "direct connection"
-        if PROXY_LIST:
-            proxy = random.choice(PROXY_LIST)
-            print(proxy, file=sys.stdout)
+        proxy = get_active_proxy()
+        
+        if proxy:
             proxies = {
                 'http': proxy,
                 'https': proxy
@@ -283,6 +323,7 @@ def handle_proxy(url):
             using_proxy = proxy
 
         print(f"Starting request to: {full_url.split('?')[0]} via {using_proxy}", file=sys.stdout)
+        print(f"Active proxies: {len(PROXY_LIST)}, Resting proxies: {len(RESTING_PROXIES)}")
         
         try:
             # Добавить случайную задержку перед запросом
@@ -310,12 +351,22 @@ def handle_proxy(url):
                 last_successful_request = datetime.now()
             
             print(f"Completed request to {full_url.split('?')[0]} - Status: {response.status_code} in {elapsed:.6f} seconds", file=sys.stdout)
+            
+            # If server error and using proxy, put proxy to rest
+            if response.status_code >= 500 and proxy:
+                print(f"Server error {response.status_code} with proxy {proxy}")
+                put_proxy_to_rest(proxy)
+            
             response.raise_for_status()
-
             return generate_proxy_response(response)
 
         except Exception as e:
             print(f"Failed request to {full_url.split('?')[0]} via {using_proxy} - Error: {str(e)}")
+            
+            # If using proxy and got an error, put it to rest
+            if proxy:
+                put_proxy_to_rest(proxy)
+                
             return {'error': str(e), 'proxies': proxies }, 500
 
 
@@ -339,7 +390,12 @@ if __name__ == "__main__":
     # Add a health check endpoint
     @app.route("/health", methods=["GET"])
     def health_check():
-        return {"status": "ok", "last_successful_request": last_successful_request.isoformat()}, 200
+        return {
+            "status": "ok", 
+            "last_successful_request": last_successful_request.isoformat(),
+            "active_proxies": len(PROXY_LIST),
+            "resting_proxies": len(RESTING_PROXIES)
+        }, 200
     
     from waitress import serve
     serve(app, host="0.0.0.0", port=5000)
