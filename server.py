@@ -58,7 +58,6 @@ scraper = cloudscraper.create_scraper(
 )
 
 def load_proxies():
-    global PROXY_LIST
     proxy_file = Path("var/proxies.txt")
     if not proxy_file.exists():
         print("Warning: var/proxies.txt not found")
@@ -82,6 +81,7 @@ def load_proxies():
                 # Старый формат (только IP:порт)
                 proxies.append(f"http://{line}")
     
+    global PROXY_LIST
     PROXY_LIST = proxies
     return proxies
 
@@ -378,6 +378,10 @@ def signal_handler(sig, frame):
 
 if __name__ == "__main__":
     print('Starting cloudflare bypass proxy server')
+    
+    # Load proxies
+    load_proxies()
+    print(f"Loaded {len(PROXY_LIST)} proxies")
     
     # Set up signal handlers
     signal.signal(signal.SIGINT, signal_handler)
