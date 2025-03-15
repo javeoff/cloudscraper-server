@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/javeoff/cloudscraper-server/compare/v1.8.0...v1.8.1) (2025-03-15)
+
+
+### Bug Fixes
+
+* Load proxies before starting server and print loaded count ([67796f9](https://github.com/javeoff/cloudscraper-server/commit/67796f92d4c8177374cf551e25661be9f771c7df))
+
 # [1.8.0](https://github.com/javeoff/cloudscraper-server/compare/v1.7.0...v1.8.0) (2025-03-15)
 
 
